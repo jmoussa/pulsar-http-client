@@ -1,0 +1,14 @@
+cycler==0.10.0
+greenlet==0.4.15
+joblib==0.15.1
+msgpack==1.0.0
+neovim==0.3.1
+numpy==1.18.4
+pandas==1.0.3
+pynvim==0.4.1
+pytz==2020.1
+scikit-learn==0.23.1
+scipy==1.4.1
+threadpoolctl==2.0.0
+grpcio<1.28,>=1.8.2
+pulsar-client==2.7.0
