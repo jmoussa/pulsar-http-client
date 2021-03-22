@@ -3,4 +3,4 @@
 *.egg-info/
 .DS_Store
 .env
-./*/config.py
+alfred/config.py
