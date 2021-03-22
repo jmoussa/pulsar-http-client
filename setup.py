@@ -8,11 +8,11 @@ def get_requirements():
         return [line.strip() for line in f]
 
 
-print(f"Packages: {find_namespace_packages(include=['message_queue.'])}")
+print(f"Packages: {find_namespace_packages(include=['alfred.'])}")
 setup(
-    name="messaging-queue",
+    name="alfred-messaging-queue",
     version="0.0.1",
-    packages=find_namespace_packages(include=["message_queue."]),
+    packages=find_namespace_packages(include=["alfred."]),
     zip_safe=False,
     install_requires=get_requirements(),
     scripts=[],
