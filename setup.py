@@ -1,5 +1,5 @@
 import os
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 
 def get_requirements():
@@ -8,11 +8,11 @@ def get_requirements():
         return [line.strip() for line in f]
 
 
-print(f"Packages: {find_namespace_packages(include=['alfred.'])}")
+print(f"Packages: {find_packages()}")
 setup(
-    name="alfred-messaging-queue",
+    name="alfred",
     version="0.0.1",
-    packages=find_namespace_packages(include=["alfred."]),
+    packages=find_packages(),
     zip_safe=False,
     install_requires=get_requirements(),
     scripts=[],
