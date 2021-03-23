@@ -14,7 +14,7 @@ from alfred.controllers import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
 )
 from alfred.models import User, Token
-from alfred.mongodb import get_nosql_db, MongoClient
+from alfred.db import get_nosql_db, MongoClient
 from alfred.config import MONGODB_DB_NAME
 
 logger = logging.getLogger(__name__)
