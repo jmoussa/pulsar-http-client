@@ -9,7 +9,8 @@ from fastapi import Depends, APIRouter
 from alfred.models import User
 from alfred.db import get_nosql_db, MongoClient
 from alfred.controllers import get_current_active_user
-from fastapi.responses import StreamingResponse
+from alfred.requests import PulsarMessage
+from fastapi.responses import StreamingResponse, JSONResponse
 
 # from alfred.config import MONGODB_DB_NAME
 
@@ -39,3 +40,27 @@ async def subscribe_to_pulsar_topic(
     """
     consumer = client.subscribe(topic, "shared")
     return StreamingResponse(consumer_generator(consumer))
+
+
+@router.post("/add_topic/{topic}", tags=["Pulsar"], response_model=JSONResponse)
+async def add_topic_to_pulsar(
+    topic, current_user=Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
+):
+    """
+    Adds a topic to pulsar
+    """
+    producer = client.create_producer(topic)
+    return JSONResponse(status_code=200, content={"topic": topic, "producer": producer})
+
+
+@router.post("/send_pulsar_message/{topic}", tags=["Pulsar"], response_model=JSONResponse)
+async def publish_to_pulsar_topic(
+    topic,
+    message: PulsarMessage,
+    current_user=Depends(get_current_active_user),
+    db: MongoClient = Depends(get_nosql_db),
+):
+
+    producer = client.create_producer(topic)
+    producer.send(message.encode("utf-8"))
+    return JSONResponse(status_code=200, content={"topic": topic, "message": {**message.message}})
