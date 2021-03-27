@@ -4,7 +4,7 @@ from alfred.db import close_mongo_connection, connect_to_mongo, get_nosql_db
 from starlette.middleware.cors import CORSMiddleware
 from alfred.config import MONGODB_DB_NAME
 
-# from alfred.api import router as api_router
+from alfred.api import router as api_router
 
 import pymongo
 import logging

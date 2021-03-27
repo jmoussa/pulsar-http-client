@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import logging
-from anonymizer.config import MONGODB_URL, MAX_CONNECTIONS_COUNT, MIN_CONNECTIONS_COUNT
+from alfred.config import MONGODB_URL, MAX_CONNECTIONS_COUNT, MIN_CONNECTIONS_COUNT
 
 
 # MongoDB

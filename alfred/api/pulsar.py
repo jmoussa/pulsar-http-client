@@ -10,7 +10,7 @@ from alfred.models import User
 from alfred.db import get_nosql_db, MongoClient
 from alfred.controllers import get_current_active_user
 from alfred.requests import PulsarMessage
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import JSONResponse
 
 # from alfred.config import MONGODB_DB_NAME
 
@@ -20,47 +20,34 @@ router = APIRouter()
 client = pulsar.Client("pulsar://localhost:6650")
 
 
+# TODO: Need to Refactor the consume functionality to work in a websocket
 async def consumer_generator(consumer):
     while True:
-        try:
-            msg = consumer.receive(2000)
-            yield "Received message '{}' id='{}'".format(msg.data(), msg.message_id())
-            consumer.acknowledge(msg)
-        except Exception:
-            pass
+        msg = consumer.receive(2000)
+        yield b"Received message '{}' id='{}'".format(msg.data(), msg.message_id())
+        consumer.acknowledge(msg)
         time.sleep(1)
 
 
-@router.post("/subscribe/{topic}", tags=["Pulsar"], response_model=StreamingResponse)
+@router.post("/subscribe/{topic}", tags=["Pulsar"])
 async def subscribe_to_pulsar_topic(
     topic, current_user: User = Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
 ):
     """
     Subsribes to a pulsar topic
     """
-    consumer = client.subscribe(topic, "shared")
-    return StreamingResponse(consumer_generator(consumer))
+    client.subscribe(topic, "shared")
+    return JSONResponse(status_code=200, content={"topic": topic})
 
 
-@router.post("/add_topic/{topic}", tags=["Pulsar"], response_model=JSONResponse)
-async def add_topic_to_pulsar(
-    topic, current_user=Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
-):
-    """
-    Adds a topic to pulsar
-    """
-    producer = client.create_producer(topic)
-    return JSONResponse(status_code=200, content={"topic": topic, "producer": producer})
-
-
-@router.post("/send_pulsar_message/{topic}", tags=["Pulsar"], response_model=JSONResponse)
+@router.post("/send_pulsar_message/{topic}", tags=["Pulsar"])
 async def publish_to_pulsar_topic(
     topic,
     message: PulsarMessage,
-    current_user=Depends(get_current_active_user),
-    db: MongoClient = Depends(get_nosql_db),
+    # current_user=Depends(get_current_active_user),
+    # db: MongoClient = Depends(get_nosql_db),
 ):
 
     producer = client.create_producer(topic)
-    producer.send(message.encode("utf-8"))
-    return JSONResponse(status_code=200, content={"topic": topic, "message": {**message.message}})
+    producer.send(message.message.encode("utf-8"))
+    return JSONResponse(status_code=200, content={"topic": topic, "message": message.message})

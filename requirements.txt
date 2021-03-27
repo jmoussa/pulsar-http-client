@@ -12,3 +12,4 @@ scipy==1.4.1
 threadpoolctl==2.0.0
 grpcio<1.28,>=1.8.2
 pulsar-client==2.7.0
+pymongo

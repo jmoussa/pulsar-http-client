@@ -4,6 +4,9 @@ from setuptools import setup, find_packages
 
 def get_requirements():
     basedir = os.path.dirname(__file__)
+    with open(os.path.join(basedir, "requirements_2.txt")) as f:
+        return [line.strip() for line in f]
+
     with open(os.path.join(basedir, "requirements.txt")) as f:
         return [line.strip() for line in f]
 
