@@ -30,14 +30,19 @@ async def consumer_generator(consumer):
 
 
 @router.post("/subscribe/{topic}", tags=["Pulsar"])
-async def subscribe_to_pulsar_topic(
-    topic, current_user: User = Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
+async def init_subscribe(
+    current_user: User = Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
 ):
     """
-    Subsribes to a pulsar topic
+    Subsribes the current_user to its preconfigured pulsar topics
     """
-    client.subscribe(topic, "shared")
-    return JSONResponse(status_code=200, content={"topic": topic})
+    topics = []
+    for topic in current_user.authorized_pulsar_topics:
+        consumer = client.subscribe(topic, "shared")
+        if consumer is not None:
+            topics.append(topic)
+
+    return JSONResponse(status_code=200, content={"initialized": topics})
 
 
 @router.post("/send_pulsar_message/{topic}", tags=["Pulsar"])

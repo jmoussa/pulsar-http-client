@@ -7,6 +7,7 @@ from bson import ObjectId
 class User(BaseModel):
     username: str
     password: str
+    authorized_pulsar_topics: Optional[List[str]]
     viewable_by: Optional[List[str]]
     data: Optional[dict]
 
