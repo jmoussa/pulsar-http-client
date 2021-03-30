@@ -68,7 +68,9 @@ async def create_user_in_db(request: UserTokenRequest, client: MongoClient = Dep
 
 
 @router.get("/verify", tags=["Authentication"])
-async def get_user_from_token(current_user: User = Depends(get_current_active_user),):
+async def get_user_from_token(
+    current_user: User = Depends(get_current_active_user),
+):
     """
     Get user from token
     """
