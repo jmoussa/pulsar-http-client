@@ -1,14 +1,12 @@
 import logging
-import pulsar
-import time
 from fastapi import Depends, APIRouter
 
 # from alfred.requests import PublishRequest, SubscribeRequest, UnsubscribeRequest
 
-# consume should be on client side
 from alfred.models import User
 from alfred.db import get_nosql_db, MongoClient
 from alfred.controllers import get_current_active_user
+from alfred.controllers.pulsar import PulsarManager
 from alfred.requests import PulsarMessage
 from fastapi.responses import JSONResponse
 
@@ -16,43 +14,28 @@ from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-client = pulsar.Client("pulsar://localhost:6650")
-
-
-# TODO: Need to Refactor the consume functionality to work in a websocket
-async def consumer_generator(consumer):
-    while True:
-        msg = consumer.receive(2000)
-        yield b"Received message '{}' id='{}'".format(msg.data(), msg.message_id())
-        consumer.acknowledge(msg)
-        time.sleep(1)
+pulsar_manager = PulsarManager()
 
 
-@router.post("/subscribe/{topic}", tags=["Pulsar"])
+@router.post("/init_subscribe", tags=["Pulsar"])
 async def init_subscribe(
     current_user: User = Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
 ):
     """
     Subsribes the current_user to its preconfigured pulsar topics
     """
-    topics = []
-    for topic in current_user.authorized_pulsar_topics:
-        consumer = client.subscribe(topic, "shared")
-        if consumer is not None:
-            topics.append(topic)
-
-    return JSONResponse(status_code=200, content={"initialized": topics})
+    response = pulsar_manager.init_user_authorized_topics(current_user)
+    return JSONResponse(status_code=200, content=response)
 
 
 @router.post("/send_pulsar_message/{topic}", tags=["Pulsar"])
 async def publish_to_pulsar_topic(
     topic,
     message: PulsarMessage,
-    # current_user=Depends(get_current_active_user),
-    # db: MongoClient = Depends(get_nosql_db),
+    current_user=Depends(get_current_active_user),
 ):
-
-    producer = client.create_producer(topic)
-    producer.send(message.message.encode("utf-8"))
-    return JSONResponse(status_code=200, content={"topic": topic, "message": message.message})
+    if topic in current_user.authorized_pulsar_topics:
+        response = pulsar_manager.publish_message(message.message, topic)
+        return JSONResponse(status_code=200, content=response)
+    else:
+        return JSONResponse(status_code=403, content={"message": "User does not have rights to publish to this topic"})
