@@ -1,9 +1,11 @@
 from pydantic import BaseModel
+from typing import Optional, List
 
 
 class UserTokenRequest(BaseModel):
     username: str
     password: str
+    authorized_pulsar_topics: Optional[List[str]]
 
 
 class AnonymizeRequest(BaseModel):

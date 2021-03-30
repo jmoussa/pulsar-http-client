@@ -78,6 +78,12 @@ async def create_user(request, collection):
 
     user = {}
     user["username"] = request.username
+    if request.authorized_pulsar_topics is not None:
+        user["authorized_pulsar_topics"] = (
+            list(request.authorized_pulsar_topics)
+            if type(request.authorized_pulsar_topics) is str
+            else request.authorized_pulsar_topics
+        )
     user["password"] = hashed_password
     dbuser = UserInDB(**user)
     try:
