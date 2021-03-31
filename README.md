@@ -1,6 +1,6 @@
-# Pulsar Notifications
+# Alfred Pulsar Notification API
 
-This is an attempt at establishing a customizable notification service on top of Apache Pulsar and hopefully setup an API with FastAPI.
+This is an attempt at establishing a customizable notification service on top of Apache Pulsar and hopefully set up an API with FastAPI.
 
 ## Dependencies
 
