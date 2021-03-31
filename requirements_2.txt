@@ -16,6 +16,7 @@ cryptography==3.4.6
 cssselect==1.1.0
 docutils==0.16
 entrypoints==0.3
+fastapi==0.63.0
 flake8==3.7.9
 greenlet==1.0.0
 hyperlink==21.0.0
@@ -41,6 +42,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.7
 pycodestyle==2.5.0
 pycparser==2.20
+pydantic==1.8.1
 PyDispatcher==2.0.5
 pyflakes==2.1.1
 Pygments==2.6.1
@@ -56,6 +58,7 @@ Scrapy==2.4.1
 service-identity==18.1.0
 six==1.14.0
 soupsieve==2.2.1
+starlette==0.13.6
 toml==0.10.2
 tqdm==4.45.0
 twine==3.1.1
