@@ -1,5 +1,5 @@
 import logging
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, WebSocket
 
 # from alfred.requests import PublishRequest, SubscribeRequest, UnsubscribeRequest
 
@@ -14,18 +14,42 @@ from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-pulsar_manager = PulsarManager()
 
 
 @router.post("/init_subscribe", tags=["Pulsar"])
-async def init_subscribe(
+async def initialize_subscriptions(
     current_user: User = Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
 ):
     """
     Subsribes the current_user to its preconfigured pulsar topics
     """
+    pulsar_manager = PulsarManager(current_user["_id"])
     response = pulsar_manager.init_user_authorized_topics(current_user)
     return JSONResponse(status_code=200, content=response)
+
+
+@router.websocket("/feed/{topic}")
+async def topic_feed(
+    websocket: WebSocket,
+    topic: str,
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Websocket that sends messages from a subscribed topic
+    """
+    pulsar_manager = PulsarManager(current_user["_id"])
+    await websocket.accept()
+    try:
+        while True:
+            for response in pulsar_manager.consumer_generator(topic):
+                await websocket.send_text(response)
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        logger.error(message)
+        # remove user
+        logger.warning(f"Disconnecting {topic} Websocket")
+        await websocket.close()
 
 
 @router.post("/send_pulsar_message/{topic}", tags=["Pulsar"])
@@ -34,6 +58,7 @@ async def publish_to_pulsar_topic(
     message: PulsarMessage,
     current_user=Depends(get_current_active_user),
 ):
+    pulsar_manager = PulsarManager(current_user["_id"])
     if topic in current_user.authorized_pulsar_topics:
         response = pulsar_manager.publish_message(message.message, topic)
         return JSONResponse(status_code=200, content=response)
