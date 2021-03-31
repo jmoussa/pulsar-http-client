@@ -36,7 +36,6 @@ class PulsarManager:
     def subscribe(self, topic):
         self.consumers[topic] = self.conn.subscribe(topic, "shared")
         self.producers[topic] = self.conn.connect(topic)
-        return self.consumers
 
     async def consumer_generator(self, topic):
         if self.consumers.get(topic, None):

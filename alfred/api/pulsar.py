@@ -16,16 +16,29 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/init_subscribe", tags=["Pulsar"])
-async def initialize_subscriptions(
-    current_user: User = Depends(get_current_active_user), db: MongoClient = Depends(get_nosql_db)
-):
+@router.get("/init_subscribe", tags=["Pulsar"])
+async def initialize_user_subscriptions(current_user: User = Depends(get_current_active_user)):
     """
     Subsribes the current_user to its preconfigured pulsar topics
     """
     pulsar_manager = PulsarManager(current_user["_id"])
     response = pulsar_manager.init_user_authorized_topics(current_user)
     return JSONResponse(status_code=200, content=response)
+
+
+@router.put("/subscribe/{topic}", tags=["Pulsar"])
+async def subscribe_to_topic(topic: str, current_user: User = Depends(get_current_active_user)):
+    """
+    Subscribe to a topic (generates producer and consumer object for user's PulsarManager)
+    """
+    try:
+        pulsar_manager = PulsarManager(current_user["_id"])
+        pulsar_manager.subscribe(topic)
+        return JSONResponse(status_code=200, content={"status": "success"})
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args)
+        return JSONResponse(status_code=500, content={"status": "failed", "message": message})
 
 
 @router.websocket("/feed/{topic}")
