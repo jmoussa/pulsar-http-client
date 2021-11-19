@@ -1,10 +1,10 @@
 # Alfred Pulsar Notification RestAPI
 
-This is an attempt at establishing a customizable notification service on top of Apache Pulsar and hopefully set up an API with FastAPI.
+This repo establishes a customizable notification service on top of Apache Pulsar and is able to be interacted with via FastAPI.
 
-## Dependencies
+## To Run
 
-### Docker Container Running Pulsar :
+### Required: Docker Container Running Pulsar
 
 ```bash
 docker run -it \
@@ -15,3 +15,14 @@ docker run -it \
   apachepulsar/pulsar:2.7.0 \
   bin/pulsar standalone
 ```
+
+### Running
+
+```bash
+conda env create -f environment.yml
+conda activate pulsar
+python setup.py develop
+cd alfred/
+cp config.template.py config.py
+# Fill in env variables here
+./run
